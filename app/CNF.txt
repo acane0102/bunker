@@ -1,0 +1,286 @@
+//@version=5
+indicator("Conteo Nex Finance - Acane", overlay=true, max_labels_count=500)
+
+// --- 1. CONFIGURACIÓN DE TIEMPO (12 HORAS ROTATIVAS) ---
+lookback_ms = 43200000 
+in_12h = time >= (last_bar_time - lookback_ms)
+
+// --- 2. INTERRUPTORES ON/OFF PARA CONTROL DE RIESGO ---
+enable_vol = input.bool(true, title="Activar Filtro Volumen (Agotamiento)", group="Filtros Inteligentes")
+enable_mtf = input.bool(true, title="Activar Filtro MTF 15m (Vela Elefante)", group="Filtros Inteligentes")
+enable_atr = input.bool(true, title="Activar Filtro ATR (Expansión de Volatilidad)", group="Filtros Inteligentes")
+
+// --- 3. CONFIGURACIÓN DE FILTROS ESTÁNDAR ---
+rsi_len = input.int(14, title="Longitud RSI", group="Parámetros Indicadores")
+rsi_ob = input.int(70, title="RSI Sobrecompra", group="Parámetros Indicadores")
+rsi_os = input.int(30, title="RSI Sobreventa", group="Parámetros Indicadores")
+rsi_val = ta.rsi(close, rsi_len)
+
+bb_len = input.int(20, title="Longitud BB", group="Parámetros Indicadores")
+bb_mult = input.float(2.0, title="Multiplicador BB", group="Parámetros Indicadores")
+[bb_basis, bb_upper, bb_lower] = ta.bb(close, bb_len, bb_mult)
+
+// --- 4. CÁLCULO DE FILTROS AVANZADOS (MÁXIMA SEGURIDAD) ---
+// Filtro 1: Agotamiento de Volumen (Detecta si las instituciones meten presión creciente)
+vol_increasing = (volume > volume[1]) and (volume[1] > volume[2])
+
+// Filtro 2: Estructura Macro MTF 15m (Evita operar contra velas institucionales sin mecha en desarrollo)
+m15_close = request.security(syminfo.tickerid, "15", close)
+m15_open  = request.security(syminfo.tickerid, "15", open)
+m15_high  = request.security(syminfo.tickerid, "15", high)
+m15_low   = request.security(syminfo.tickerid, "15", low)
+m15_body  = math.abs(m15_close - m15_open)
+m15_range = m15_high - m15_low
+m15_avg_body = request.security(syminfo.tickerid, "15", ta.sma(math.abs(close - open), 10))
+
+m15_elephant_green = (m15_close > m15_open) and (m15_body > 1.5 * m15_avg_body) and (m15_body > 0.7 * m15_range)
+m15_elephant_red   = (m15_close < m15_open) and (m15_body > 1.5 * m15_avg_body) and (m15_body > 0.7 * m15_range)
+
+// Filtro 3: Expansión de Rango (ATR Spike que alerta ruptura inminente de zona)
+current_atr = ta.atr(14)
+avg_atr = ta.sma(current_atr, 20)
+atr_spike = current_atr > 1.8 * avg_atr
+
+// --- 5. VARIABLES DE CONTROL Y ARREGLOS ---
+var int green_count = 0
+var int red_count = 0
+
+var int[] green_lengths = array.new_int()
+var int[] green_times   = array.new_int()
+var int[] red_lengths   = array.new_int()
+var int[] red_times     = array.new_int()
+
+var label last_green_label = na
+var label last_red_label = na
+
+// --- 6. IDENTIFICACIÓN DE VELAS (LÓGICA DOJI) ---
+bool is_green = close > open
+bool is_red = close < open
+bool is_doji = close == open
+
+if is_doji
+    if green_count > 0
+        is_green := true
+    else if red_count > 0
+        is_red := true
+    else
+        is_red := true 
+
+// --- 7. MOTOR DE CONTEO HISTÓRICO ---
+if is_green
+    green_count += 1
+    if red_count >= 5
+        array.push(red_lengths, red_count)
+        array.push(red_times, time[1])
+        if array.size(red_lengths) > 500
+            array.shift(red_lengths)
+            array.shift(red_times)
+    red_count := 0
+    
+    if in_12h and green_count >= 5
+        if green_count > 5 and not na(last_green_label)
+            label.delete(last_green_label)
+        last_green_label := label.new(x=bar_index, y=na, text=str.tostring(green_count), color=color.new(#089981, 0), textcolor=color.white, style=label.style_label_down, yloc=yloc.abovebar)
+
+else if is_red
+    red_count += 1
+    if green_count >= 5
+        array.push(green_lengths, green_count)
+        array.push(green_times, time[1])
+        if array.size(green_lengths) > 500
+            array.shift(green_lengths)
+            array.shift(green_times)
+    green_count := 0
+    
+    if in_12h and red_count >= 5
+        if red_count > 5 and not na(last_red_label)
+            label.delete(last_red_label)
+        last_red_label := label.new(x=bar_index, y=na, text=str.tostring(red_count), color=color.new(#F23645, 0), textcolor=color.white, style=label.style_label_up, yloc=yloc.belowbar)
+
+// --- 8. CONDICIONES DE ENTRADA CON TRIPLE DEFENSA ---
+base_sell = (green_count == 6 or green_count == 7) and (rsi_val >= rsi_ob or high >= bb_upper)
+base_buy  = (red_count == 6 or red_count == 7) and (rsi_val <= rsi_os or low <= bb_lower)
+
+// Aplicación condicional de filtros ON/OFF
+bool vol_ok_sell = not (enable_vol and vol_increasing)
+bool mtf_ok_sell = not (enable_mtf and m15_elephant_green)
+bool atr_ok_sell = not (enable_atr and atr_spike)
+
+bool vol_ok_buy  = not (enable_vol and vol_increasing)
+bool mtf_ok_buy  = not (enable_mtf and m15_elephant_red)
+bool atr_ok_buy  = not (enable_atr and atr_spike)
+
+sell_signal = in_12h and base_sell and vol_ok_sell and mtf_ok_sell and atr_ok_sell
+buy_signal  = in_12h and base_buy and vol_ok_buy and mtf_ok_buy and atr_ok_buy
+
+// Dibujar flechas de confirmación óptima (Gatillo Amarillo) si pasan los filtros
+plotshape(sell_signal and green_count < 10, title="Gatillo Venta", style=shape.arrowdown, location=location.abovebar, color=color.new(color.yellow, 0), size=size.normal)
+plotshape(buy_signal and red_count < 10, title="Gatillo Compra", style=shape.arrowup, location=location.belowbar, color=color.new(color.yellow, 0), size=size.normal)
+
+// Alertas de Emergencia Absoluta (Vela 10+ activa)
+racha_critica_venta = in_12h and green_count >= 10
+racha_critica_compra = in_12h and red_count >= 10
+
+plotshape(racha_critica_venta, title="⚠️ CRÍTICO VENTA", style=shape.labeldown, location=location.abovebar, color=color.new(#FF0000, 0), text="⚠️ CRÍTICO", textcolor=color.white, size=size.normal)
+plotshape(racha_critica_compra, title="⚠️ CRÍTICO COMPRA", style=shape.labelup, location=location.belowbar, color=color.new(#FF0000, 0), text="⚠️ CRÍTICO", textcolor=color.white, size=size.normal)
+
+// --- 9. PROCESAMIENTO MATEMÁTICO DE LA MATRIZ DE CONTROL ---
+var int g_v5 = 0
+var int g_v6 = 0
+var int g_v7 = 0
+var int g_v8 = 0
+var int g_v9 = 0
+var int g_v10 = 0
+
+var int r_v5 = 0
+var int r_v6 = 0
+var int r_v7 = 0
+var int r_v8 = 0
+var int r_v9 = 0
+var int r_v10 = 0
+
+var int max_g_12h = 0
+var int max_r_12h = 0
+
+if barstate.islast
+    g_v5 := 0
+    g_v6 := 0
+    g_v7 := 0
+    g_v8 := 0
+    g_v9 := 0
+    g_v10 := 0
+    
+    r_v5 := 0
+    r_v6 := 0
+    r_v7 := 0
+    r_v8 := 0
+    r_v9 := 0
+    r_v10 := 0
+    
+    max_g_12h := 0
+    max_r_12h := 0
+    
+    limit_time = last_bar_time - lookback_ms
+    
+    // Escaneo Historial Verde
+    if array.size(green_lengths) > 0
+        for i = 0 to array.size(green_lengths) - 1
+            if array.get(green_times, i) >= limit_time
+                val = array.get(green_lengths, i)
+                if val > max_g_12h
+                    max_g_12h := val
+                if val == 5
+                    g_v5 += 1
+                else if val == 6
+                    g_v6 += 1
+                else if val == 7
+                    g_v7 += 1
+                else if val == 8
+                    g_v8 += 1
+                else if val == 9
+                    g_v9 += 1
+                else if val >= 10
+                    g_v10 += 1
+                    
+    // Escaneo Historial Rojo
+    if array.size(red_lengths) > 0
+        for i = 0 to array.size(red_lengths) - 1
+            if array.get(red_times, i) >= limit_time
+                val = array.get(red_lengths, i)
+                if val > max_r_12h
+                    max_r_12h := val
+                if val == 5
+                    r_v5 += 1
+                else if val == 6
+                    r_v6 += 1
+                else if val == 7
+                    r_v7 += 1
+                else if val == 8
+                    r_v8 += 1
+                else if val == 9
+                    r_v9 += 1
+                else if val >= 10
+                    r_v10 += 1
+
+    // Integración de racha en vivo
+    if green_count > max_g_12h
+        max_g_12h := green_count
+    if green_count >= 5
+        if green_count == 5
+            g_v5 += 1
+        else if green_count == 6
+            g_v6 += 1
+        else if green_count == 7
+            g_v7 += 1
+        else if green_count == 8
+            g_v8 += 1
+        else if green_count == 9
+            g_v9 += 1
+        else if green_count >= 10
+            g_v10 += 1
+            
+    if red_count > max_r_12h
+        max_r_12h := red_count
+    if red_count >= 5
+        if red_count == 5
+            r_v5 += 1
+        else if red_count == 6
+            r_v6 += 1
+        else if red_count == 7
+            r_v7 += 1
+        else if red_count == 8
+            r_v8 += 1
+        else if red_count == 9
+            r_v9 += 1
+        else if red_count >= 10
+            r_v10 += 1
+
+    // --- 10. RENDERIZADO DEL PANEL CON CUARENTENA DINÁMICA ---
+    var table stats_table = table.new(position.top_right, 8, 3, bgcolor=color.new(#131722, 10), frame_color=color.new(color.gray, 60), frame_width=1, border_width=1)
+    
+    // Gestión de Estados de Alerta (Filtro de Resaca de Volatilidad)
+    color asset_bg = color.new(color.gray, 80)
+    string asset_text = syminfo.ticker
+    
+    if max_g_12h >= 10 or max_r_12h >= 10
+        asset_bg := color.new(#F23645, 0) // ROJO INTENSO: Peligro Crítico, Par No Operable
+        asset_text := syminfo.ticker + " ⚠️ NO OP"
+    else if max_g_12h >= 8 or max_r_12h >= 8
+        asset_bg := color.new(#FFB300, 0) // ÁMBAR: Cuarentena Dinámica por Alta Volatilidad Reciente
+        asset_text := syminfo.ticker + " ⚠️ ALTA VOL"
+        
+    color header_text_color = color.white
+    
+    // Construcción del Cuadro
+    table.cell(stats_table, 0, 0, asset_text, text_color=header_text_color, bgcolor=asset_bg, text_size=size.large)
+    table.cell(stats_table, 1, 0, "V5", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 2, 0, "V6", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 3, 0, "V7", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 4, 0, "V8", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 5, 0, "V9", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 6, 0, "V10+", text_color=header_text_color, bgcolor=color.new(color.gray, 80), text_size=size.large)
+    table.cell(stats_table, 7, 0, "MÁX", text_color=header_text_color, bgcolor=asset_bg, text_size=size.large)
+    
+    // Fila de Alcistas (Verdes)
+    color g_bg = color.new(#089981, 85)
+    color g_txt = color.new(#089981, 0)
+    table.cell(stats_table, 0, 1, "VERDES", text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 1, 1, str.tostring(g_v5), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 2, 1, str.tostring(g_v6), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 3, 1, str.tostring(g_v7), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 4, 1, str.tostring(g_v8), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 5, 1, str.tostring(g_v9), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 6, 1, str.tostring(g_v10), text_color=g_txt, bgcolor=g_bg, text_size=size.large)
+    table.cell(stats_table, 7, 1, str.tostring(max_g_12h), text_color=color.white, bgcolor=max_g_12h >= 10 ? color.new(#F23645, 20) : max_g_12h >= 8 ? color.new(#FFB300, 30) : g_bg, text_size=size.large)
+    
+    // Fila de Bajistas (Rojas)
+    color r_bg = color.new(#F23645, 85)
+    color r_txt = color.new(#F23645, 0)
+    table.cell(stats_table, 0, 2, "ROJAS", text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 1, 2, str.tostring(r_v5), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 2, 2, str.tostring(r_v6), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 3, 2, str.tostring(r_v7), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 4, 2, str.tostring(r_v8), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 5, 2, str.tostring(r_v9), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 6, 2, str.tostring(r_v10), text_color=r_txt, bgcolor=r_bg, text_size=size.large)
+    table.cell(stats_table, 7, 2, str.tostring(max_r_12h), text_color=color.white, bgcolor=max_r_12h >= 10 ? color.new(#F23645, 20) : max_r_12h >= 8 ? color.new(#FFB300, 30) : r_bg, text_size=size.large) 
