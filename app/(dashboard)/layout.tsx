@@ -72,9 +72,9 @@ export default async function DashboardLayout({
     );
   }
 
-  // RENDERIZADO NORMAL (Sin HTML ni BODY, usando Fragmentos de React)
+  // RENDERIZADO NORMAL 
   return (
-    <>
+    <div className="flex w-full min-h-screen overflow-hidden bg-[#07050f]">
       <Sidebar />
       <Toaster 
         position="top-right"
@@ -86,10 +86,12 @@ export default async function DashboardLayout({
         }} 
       />
       <GlobalModals />
-      <div className="flex-1 flex flex-col min-h-screen">
+      
+      {/* EL CONTENEDOR PRINCIPAL: Ahora respeta el Sidebar en PC y no desborda en móvil */}
+      <main className="flex-1 flex flex-col w-full h-screen overflow-y-auto overflow-x-hidden md:ml-[250px]">
         <TrialBanner />
         {children}
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

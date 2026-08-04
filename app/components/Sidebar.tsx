@@ -19,6 +19,9 @@ export default function Sidebar() {
   // ESTADO PARA CONTROLAR TU MODAL
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  // ESTADO PARA EL MENÚ MÓVIL
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -36,6 +39,13 @@ export default function Sidebar() {
     fetchUser();
   }, [supabase.auth]);
 
+  // ESCUCHADOR DEL BOTÓN HAMBURGUESA (Conecta con el Topbar)
+  useEffect(() => {
+    const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
+    window.addEventListener('toggle-mobile-menu', toggleMenu);
+    return () => window.removeEventListener('toggle-mobile-menu', toggleMenu);
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
@@ -51,22 +61,43 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-[250px] bg-[#0b0914] text-slate-300 flex flex-col h-screen fixed left-0 top-0 border-r border-slate-800/50 z-40 font-sans">
+      {/* OVERLAY OSCURO PARA MÓVIL (Cierra el menú al hacer clic fuera) */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* ASIDE CON ANIMACIÓN DE DESLIZAMIENTO PARA MÓVILES Y FIJO EN PC */}
+      <aside className={`fixed md:flex w-[250px] bg-[#0b0914] text-slate-300 flex-col h-screen top-0 left-0 border-r border-slate-800/50 z-50 font-sans transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         
-        {/* Logo */}
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center font-black text-white text-lg shadow-md shadow-indigo-500/20">
-            B
+        {/* Logo ACANE BUNKER y Botón de cierre en móvil */}
+        <div className="p-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center font-black text-white text-lg shadow-md shadow-indigo-500/20">
+              A
+            </div>
+            <span className="font-extrabold text-xl tracking-wide text-white">
+              ACANE <span className="text-indigo-500">BUNKER</span>
+            </span>
           </div>
-          <span className="font-extrabold text-xl tracking-wide text-white">
-            BÚNKER<span className="text-indigo-500">APP</span>
-          </span>
+          
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="md:hidden text-slate-400 hover:text-white transition-colors"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
         </div>
 
         {/* ÁREA DE BOTONES DE ACCIÓN */}
         <div className="px-4 py-2 flex flex-col gap-2">
           <button 
-            onClick={() => window.dispatchEvent(new Event('open-add-trade'))}
+            onClick={() => {
+              setIsMobileMenuOpen(false); // Cierra el menú en móvil al hacer clic
+              window.dispatchEvent(new Event('open-add-trade'));
+            }}
             className="w-full cursor-pointer bg-[#6366f1] hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -75,7 +106,10 @@ export default function Sidebar() {
 
           {/* BOTÓN CONECTADO AL ESTADO LOCAL */}
           <button 
-            onClick={() => setIsImportModalOpen(true)}
+            onClick={() => {
+              setIsMobileMenuOpen(false); // Cierra el menú en móvil al hacer clic
+              setIsImportModalOpen(true);
+            }}
             className="w-full cursor-pointer bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 text-slate-400 hover:text-indigo-400 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-xs"
           >
             <span className="material-symbols-outlined text-[16px]">upload</span>
@@ -92,6 +126,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)} // Cerrar menú al navegar en móvil
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive
                     ? "bg-indigo-900/40 border-l-4 border-indigo-500 text-white"
