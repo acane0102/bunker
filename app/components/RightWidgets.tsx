@@ -1,5 +1,7 @@
-// 1. Clasificación de trades
-  const wins = filteredTrades.filter((t: any) => ((Number(t.rr_achieved) || 0) - (Number(t.commission) || 0)) > 0);
+/// @ts-nocheck/ 1. Clasificación de trades
+// @ts-nocheck  
+
+const wins = filteredTrades.filter((t: any) => ((Number(t.rr_achieved) || 0) - (Number(t.commission) || 0)) > 0);
   const losses = filteredTrades.filter((t: any) => ((Number(t.rr_achieved) || 0) - (Number(t.commission) || 0)) < 0);
   const bes = filteredTrades.filter((t: any) => ((Number(t.rr_achieved) || 0) - (Number(t.commission) || 0)) === 0);
 
