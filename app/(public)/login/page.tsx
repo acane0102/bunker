@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // <-- Importación clave para los enlaces de Next.js
 
 export default function AuthPage() {
   const router = useRouter();
   
-  const [isLogin, setIsLogin] = useState(true);
+  // Cambiamos 'isLogin' por 'view' para manejar los 3 estados
+  const [view, setView] = useState<'login' | 'register' | 'forgot'>('login');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -44,7 +46,21 @@ export default function AuthPage() {
     setSuccessMsg("");
 
     try {
-      if (isLogin) {
+      if (view === 'forgot') {
+        // LÓGICA DE RECUPERACIÓN DE CONTRASEÑA
+        if (!email) throw new Error("Ingresa tu correo para recuperar el acceso.");
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          // A donde enviaremos al usuario a escribir su nueva clave
+          redirectTo: `${window.location.origin}/actualizar-password`, 
+        });
+        
+        if (error) throw error;
+        
+        setSuccessMsg("Te enviamos un enlace táctico a tu correo para restablecer tu contraseña.");
+        
+      } else if (view === 'login') {
+        // LÓGICA DE INICIO DE SESIÓN
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -52,10 +68,11 @@ export default function AuthPage() {
         
         if (error) throw error;
         
-        router.push("/panel");
+        router.push("/dashboard"); 
         router.refresh();
+
       } else {
-        // Registro limpio: Solo email y pass. El perfil se edita adentro.
+        // LÓGICA DE REGISTRO
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -64,11 +81,11 @@ export default function AuthPage() {
         if (error) throw error;
 
         if (data?.session) {
-          router.push("/panel");
+          router.push("/dashboard");
           router.refresh();
         } else {
           setSuccessMsg("¡Misión cumplida! Revisa tu correo para verificar tu acceso.");
-          setIsLogin(true);
+          setView('login');
           setPassword("");
         }
       }
@@ -93,10 +110,12 @@ export default function AuthPage() {
             <span className="text-white font-black text-3xl leading-none">B</span>
           </div>
           <h2 className="text-3xl font-black text-white text-center tracking-tight mb-2">
-            {isLogin ? "Welcome to BúnkerApp" : "Join the Elite"}
+            {view === 'login' && "Iniciar sesión"}
+            {view === 'register' && "Crear cuenta"}
+            {view === 'forgot' && "Recuperar acceso"}
           </h2>
           <p className="text-slate-400 text-[15px] font-medium text-center">
-            We help traders become profitable!
+            {view === 'forgot' ? "Ingresa tu correo para recibir las instrucciones." : "Cero emociones, pura ejecución."}
           </p>
         </div>
 
@@ -114,23 +133,26 @@ export default function AuthPage() {
           </div>
         )}
 
-        {/* BOTÓN GOOGLE MINIMALISTA */}
-        <button 
-          onClick={handleGoogleLogin} 
-          disabled={loading}
-          type="button"
-          className="w-full flex items-center justify-center gap-3 bg-transparent border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold py-3.5 rounded-xl transition-all text-sm disabled:opacity-50"
-        >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-          {isLogin ? "Sign in with Google" : "Sign up with Google"}
-        </button>
+        {/* OCULTAR BOTÓN DE GOOGLE SI ESTÁ RECUPERANDO CONTRASEÑA */}
+        {view !== 'forgot' && (
+          <>
+            <button 
+              onClick={handleGoogleLogin} 
+              disabled={loading}
+              type="button"
+              className="w-full flex items-center justify-center gap-3 bg-transparent border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold py-3.5 rounded-xl transition-all text-sm disabled:opacity-50"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+              {view === 'login' ? "Entrar con Google" : "Registrarse con Google"}
+            </button>
 
-        {/* DIVISOR */}
-        <div className="flex items-center gap-4 my-8">
-          <div className="flex-1 h-px bg-slate-800/80"></div>
-          <span className="text-xs font-medium text-slate-500 lowercase">or</span>
-          <div className="flex-1 h-px bg-slate-800/80"></div>
-        </div>
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-slate-800/80"></div>
+              <span className="text-xs font-medium text-slate-500 lowercase">o</span>
+              <div className="flex-1 h-px bg-slate-800/80"></div>
+            </div>
+          </>
+        )}
         
         {/* FORMULARIO MANUAL */}
         <form onSubmit={handleEmailAuth} className="flex flex-col gap-5">
@@ -141,21 +163,24 @@ export default function AuthPage() {
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder="Correo electrónico"
               className="w-full bg-[#131022] border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-sm font-medium text-white outline-none transition-all placeholder:text-slate-600 focus:ring-1 focus:ring-indigo-500/50" 
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <input 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full bg-[#131022] border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-sm font-medium text-white outline-none transition-all placeholder:text-slate-600 focus:ring-1 focus:ring-indigo-500/50" 
-            />
-          </div>
+          {/* OCULTAR CONTRASEÑA SI ESTÁ RECUPERANDO */}
+          {view !== 'forgot' && (
+            <div className="flex flex-col gap-1.5">
+              <input 
+                type="password" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña"
+                className="w-full bg-[#131022] border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-sm font-medium text-white outline-none transition-all placeholder:text-slate-600 focus:ring-1 focus:ring-indigo-500/50" 
+              />
+            </div>
+          )}
 
           {/* ACCIÓN PRINCIPAL Y FORGOT PASSWORD */}
           <div className="flex flex-col gap-4 mt-2">
@@ -164,33 +189,55 @@ export default function AuthPage() {
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 transition-all text-sm disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              {loading ? <span className="animate-pulse">Loading...</span> : (isLogin ? "Sign in" : "Sign up")}
+              {loading ? (
+                <span className="animate-pulse">Cargando...</span>
+              ) : (
+                view === 'login' ? "Entrar" : view === 'register' ? "Registrarse" : "Enviar enlace de recuperación"
+              )}
             </button>
 
-            {isLogin && (
+            {/* TEXTO LEGAL - SOLO VISIBLE EN REGISTRO */}
+            {view === 'register' && (
+              <p className="text-center text-xs font-medium text-slate-500 mt-2 leading-relaxed">
+                Al crear una cuenta aceptas nuestros <br />
+                {/* AQUI ESTÁN LOS ENLACES CORREGIDOS */}
+                <Link href="/terminos" className="text-indigo-400 hover:text-indigo-300 transition-colors">Términos de Servicio</Link> y <Link href="/privacidad" className="text-indigo-400 hover:text-indigo-300 transition-colors">Política de Privacidad</Link>.<br/>
+                <span className="block mt-2 text-[11px] opacity-70">Contacto: info@businessforex.club</span>
+              </p>
+            )}
+
+            {view === 'login' && (
               <div className="text-center">
-                <a href="#" className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
-                  Forgot password?
-                </a>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setView('forgot');
+                    setErrorMsg("");
+                    setSuccessMsg("");
+                  }}
+                  className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
               </div>
             )}
           </div>
         </form>
 
-        {/* TOGGLE REGISTRO/LOGIN (Al estilo SaaS) */}
+        {/* TOGGLE INFERIOR PARA NAVEGAR ENTRE PANTALLAS */}
         <div className="mt-10 text-center border-t border-slate-800/80 pt-6">
           <p className="text-sm font-medium text-slate-400">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            {view === 'login' ? "¿No tienes una cuenta? " : view === 'register' ? "¿Ya tienes una cuenta? " : "¿Recordaste tu contraseña? "}
             <button 
               type="button"
               onClick={() => {
-                setIsLogin(!isLogin);
+                setView(view === 'login' ? 'register' : 'login');
                 setErrorMsg("");
                 setSuccessMsg("");
               }}
               className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors ml-1"
             >
-              {isLogin ? "Sign up" : "Sign in"}
+              {view === 'login' ? "Regístrate aquí" : "Inicia sesión"}
             </button>
           </p>
         </div>
