@@ -166,7 +166,7 @@ export default function TradeLogs() {
   if (!isMounted) return null;
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-700 dark:text-slate-300 font-sans pb-10 pl-[250px] relative transition-colors duration-300">
+    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-700 dark:text-slate-300 font-sans pb-10 lg:pl-[250px] relative transition-colors duration-300">
       
       {/* Botón superior disparando evento global (Modo Creación) */}
       <Topbar title="Trade Logs" icon="receipt_long" displayUnit={displayUnit} setDisplayUnit={setDisplayUnit} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} onAddTradeClick={() => window.dispatchEvent(new Event('open-add-trade'))} />
@@ -202,37 +202,37 @@ export default function TradeLogs() {
         </div>
       )}
 
-      <main className="pt-24 px-6 max-w-[1200px] mx-auto space-y-4">
+      <main className="pt-20 md:pt-24 px-4 md:px-6 max-w-[1200px] mx-auto space-y-4">
         {/* TARJETAS RESUMEN SUPERIOR */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex justify-between items-center transition-colors duration-300">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors duration-300">
           <div>
             <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Resumen de Operativa</h2>
             <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-0.5">Filtro activo: {processedTrades.length} trades</p>
           </div>
-          <div className="flex gap-8 items-center">
-            <div className="text-right border-r border-slate-200 dark:border-slate-800 pr-8 hidden md:block">
+          <div className="flex flex-wrap gap-4 md:gap-8 items-center w-full md:w-auto justify-between md:justify-end">
+            <div className="text-right border-r border-slate-200 dark:border-slate-800 pr-4 md:pr-8 hidden md:block">
               <div className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Comisiones</div>
               <div className="text-xl font-black text-rose-500">-${totalCommissions.toFixed(2)}</div>
             </div>
             <div className="text-right">
               <div className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Neto Total</div>
-              <div className={`text-xl font-black ${totalNet >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{totalNet > 0 ? '+' : ''}${totalNet.toFixed(2)}</div>
+              <div className={`text-lg md:text-xl font-black ${totalNet >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{totalNet > 0 ? '+' : ''}${totalNet.toFixed(2)}</div>
             </div>
             <div className="text-right">
               <div className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Win Rate</div>
-              <div className="text-xl font-black text-slate-800 dark:text-slate-100">{winRate}%</div>
+              <div className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100">{winRate}%</div>
             </div>
             <div className="flex gap-1.5 text-[10px] font-bold">
-              <div className="flex flex-col items-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20"><span className="text-sm font-black">{wins}</span><span className="text-[8px] uppercase">Wins</span></div>
-              <div className="flex flex-col items-center bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700"><span className="text-sm font-black">{be}</span><span className="text-[8px] uppercase">BE</span></div>
-              <div className="flex flex-col items-center bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-3 py-1.5 rounded-lg border border-rose-100 dark:border-rose-500/20"><span className="text-sm font-black">{losses}</span><span className="text-[8px] uppercase">Loss</span></div>
+              <div className="flex flex-col items-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-100 dark:border-emerald-500/20"><span className="text-xs md:text-sm font-black">{wins}</span><span className="text-[7px] uppercase">Wins</span></div>
+              <div className="flex flex-col items-center bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700"><span className="text-xs md:text-sm font-black">{be}</span><span className="text-[7px] uppercase">BE</span></div>
+              <div className="flex flex-col items-center bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-lg border border-rose-100 dark:border-rose-500/20"><span className="text-xs md:text-sm font-black">{losses}</span><span className="text-[7px] uppercase">Loss</span></div>
             </div>
           </div>
         </div>
 
         {/* BARRA DE FILTROS Y BÚSQUEDA */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap gap-4 items-center transition-colors duration-300">
-          <div className="flex items-center gap-2 px-2 border-r border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap gap-2 md:gap-4 items-center transition-colors duration-300">
+          <div className="hidden sm:flex items-center gap-2 px-2 border-r border-slate-200 dark:border-slate-700">
             <span className="material-symbols-outlined text-indigo-500 text-lg">tune</span>
           </div>
           <div className="relative group"><span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">calendar_month</span><select value={filters.month} onChange={e => {setFilters({...filters, month: e.target.value}); setCurrentPage(1);}} className="appearance-none pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none hover:border-indigo-300 dark:hover:border-indigo-500/50 cursor-pointer shadow-sm"><option value="ALL">Histórico</option>{uniqueMonths.map(m => <option key={m} value={m}>{formatMonth(m)}</option>)}</select></div>
@@ -241,36 +241,36 @@ export default function TradeLogs() {
           <div className="relative group"><span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">offline_bolt</span><select value={filters.result} onChange={e => {setFilters({...filters, result: e.target.value}); setCurrentPage(1);}} className="appearance-none pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none hover:border-indigo-300 dark:hover:border-indigo-500/50 cursor-pointer shadow-sm"><option value="ALL">Resultados</option><option value="WIN">Ganadores</option><option value="LOSS">Perdedores</option></select></div>
           <div className="relative group"><span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">school</span><select value={filters.mentor} onChange={e => {setFilters({...filters, mentor: e.target.value}); setCurrentPage(1);}} className="appearance-none pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none hover:border-indigo-300 dark:hover:border-indigo-500/50 cursor-pointer shadow-sm"><option value="ALL">Todos los Mentores</option>{uniqueMentors.map(m => <option key={m as string} value={m as string}>{m}</option>)}</select></div>
 
-          <div className="relative group ml-auto flex-grow max-w-xs">
+          <div className="relative group w-full lg:w-auto lg:ml-auto flex-grow max-w-xs">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">search</span>
             <input type="text" placeholder="Buscar notas, tags, setup..." value={searchQuery} onChange={e => {setSearchQuery(e.target.value); setCurrentPage(1);}} className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none hover:border-indigo-300 dark:hover:border-indigo-500/50 focus:border-indigo-500 shadow-sm transition-all" />
           </div>
 
-          <button onClick={exportToCSV} className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-4 py-2 rounded-xl text-xs font-bold transition-colors ml-2">
+          <button onClick={exportToCSV} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-4 py-2 rounded-xl text-xs font-bold transition-colors">
             <span className="material-symbols-outlined text-[16px]">download</span> Exportar CSV
           </button>
         </div>
 
         {selectedTrades.length > 0 && (
-          <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-4 flex justify-between items-center shadow-sm animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3 text-rose-700 dark:text-rose-400"><span className="material-symbols-outlined">delete_sweep</span><span className="text-sm font-black">{selectedTrades.length} operaciones seleccionadas</span></div>
-            <div className="flex gap-3"><button onClick={() => setSelectedTrades([])} className="px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-lg transition-colors">Cancelar</button><button onClick={handleBulkDelete} className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-lg shadow-sm transition-colors">Eliminar Definitivamente</button></div>
+          <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-3 text-rose-700 dark:text-rose-400"><span className="material-symbols-outlined">delete_sweep</span><span className="text-xs sm:text-sm font-black">{selectedTrades.length} operaciones seleccionadas</span></div>
+            <div className="flex gap-3 w-full sm:w-auto justify-end"><button onClick={() => setSelectedTrades([])} className="px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-lg transition-colors">Cancelar</button><button onClick={handleBulkDelete} className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-lg shadow-sm transition-colors">Eliminar Definitivamente</button></div>
           </div>
         )}
 
         {/* TABLA PRINCIPAL */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-colors duration-300">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800/50">
-                  <th className="py-4 px-6 w-12 text-center"><input type="checkbox" checked={currentTrades.length > 0 && selectedTrades.length === currentTrades.length} onChange={toggleSelectAll} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer" /></th>
-                  <th className="py-4 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('created_at')}>Fecha / Sesión</th>
-                  <th className="py-4 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('asset')}>Activo</th>
-                  <th className="py-4 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Cuenta / Mentor</th>
-                  <th className="py-4 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Setup & Evidencia</th>
-                  <th className="py-4 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('net')}>Resultado Neto</th>
-                  <th className="py-4 px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Acciones</th>
+                  <th className="py-4 px-4 md:px-6 w-12 text-center"><input type="checkbox" checked={currentTrades.length > 0 && selectedTrades.length === currentTrades.length} onChange={toggleSelectAll} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer" /></th>
+                  <th className="py-4 px-3 md:px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('created_at')}>Fecha / Sesión</th>
+                  <th className="py-4 px-3 md:px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('asset')}>Activo</th>
+                  <th className="py-4 px-3 md:px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Cuenta / Mentor</th>
+                  <th className="py-4 px-3 md:px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Setup & Evidencia</th>
+                  <th className="py-4 px-3 md:px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-slate-600 dark:hover:text-slate-300" onClick={() => handleSort('net')}>Resultado Neto</th>
+                  <th className="py-4 px-4 md:px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -292,25 +292,25 @@ export default function TradeLogs() {
                         <tr onClick={() => toggleRow(trade.id)} className={`transition-colors group relative cursor-pointer ${isSelected ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'} ${isExpanded ? 'bg-slate-50 dark:bg-slate-800/30' : ''}`}>
                           <td className="absolute left-0 top-0 bottom-0 w-1"><div className={`w-full h-full ${isWin ? 'bg-emerald-500' : isBE ? 'bg-slate-400' : 'bg-rose-500'} ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}></div></td>
                           
-                          <td className="py-4 px-6 text-center" onClick={e => e.stopPropagation()}>
+                          <td className="py-4 px-4 md:px-6 text-center" onClick={e => e.stopPropagation()}>
                             <input type="checkbox" checked={isSelected} onChange={() => toggleSelectTrade(trade.id)} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-3 md:px-4">
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{`${d.getDate()}/${d.getMonth() + 1}, ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`}</span>
                               <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border w-max ${session.color}`}>{session.label}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-3 md:px-4">
                             <div className="flex flex-col gap-0.5">
                               <span className="text-sm font-black text-slate-800 dark:text-slate-100">{trade.asset}</span>
                               <div className="flex items-center gap-1"><div className={`w-1.5 h-1.5 rounded-full ${trade.direction === 'SELL' ? 'bg-rose-500' : 'bg-emerald-500'}`}></div><span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">{trade.direction || 'BUY'}</span></div>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-3 md:px-4">
                             <div className="flex flex-col"><span className="text-xs font-bold text-slate-700 dark:text-slate-300">{trade.account}</span><span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{trade.mentor || 'Propia'}</span></div>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-3 md:px-4">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{trade.setup_type || 'Sin definir'}</span>
                               {trade.image_url ? (
@@ -320,13 +320,13 @@ export default function TradeLogs() {
                               )}
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-right">
+                          <td className="py-4 px-3 md:px-4 text-right">
                             <div className="flex flex-col items-end gap-1.5">
                               <span className={`text-sm font-black ${isWin ? 'text-emerald-500' : netProfit < 0 ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{isWin ? '+' : ''}${netProfit.toFixed(2)}</span>
                               <div className={`px-2 py-0.5 rounded text-[8px] font-black tracking-widest border ${isWin ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30' : netProfit < 0 ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/30'}`}>{isWin ? 'TARGET' : netProfit < 0 ? 'STOP' : 'BE'}</div>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-center" onClick={e => e.stopPropagation()}>
+                          <td className="py-4 px-4 md:px-6 text-center" onClick={e => e.stopPropagation()}>
                             <button onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('open-add-trade', { detail: trade })); }} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-700"><span className="material-symbols-outlined text-[18px] block">edit</span></button>
                             <button onClick={() => toggleRow(trade.id)} className="text-slate-400 dark:text-slate-500 p-1.5 ml-1 transition-transform"><span className={`material-symbols-outlined text-[18px] block transform ${isExpanded ? 'rotate-180' : ''}`}>expand_more</span></button>
                           </td>
@@ -336,7 +336,7 @@ export default function TradeLogs() {
                         {isExpanded && (
                           <tr>
                             <td colSpan={7} className="p-0 border-b border-slate-200 dark:border-slate-800">
-                              <div className="bg-slate-100/50 dark:bg-[#0B1120] p-6 shadow-inner flex flex-col md:flex-row gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className="bg-slate-100/50 dark:bg-[#0B1120] p-4 md:p-6 shadow-inner flex flex-col md:flex-row gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="flex-1 space-y-4">
                                   <div>
                                     <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">psychology</span> Etiquetas Mentales</h4>
@@ -377,7 +377,7 @@ export default function TradeLogs() {
           </div>
           
           {totalPages > 1 && (
-             <div className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800/50 px-6 py-4 flex items-center justify-between">
+             <div className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800/50 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500">Mostrando {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, processedTrades.length)} de {processedTrades.length} trades</span>
               <div className="flex gap-2">
                 <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"><span className="material-symbols-outlined text-sm block">chevron_left</span></button>

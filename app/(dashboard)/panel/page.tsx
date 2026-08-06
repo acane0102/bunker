@@ -25,7 +25,7 @@ const BUNKER_MESSAGES = [
 export default function HomePage() {
   const [allTrades, setAllTrades] = useState<any[]>([]);
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
-  const [mentors, setMentors] = useState<any[]>([]); // <-- NUEVO: Estado para saber el tipo de cuenta
+  const [mentors, setMentors] = useState<any[]>([]); 
   const [isLoading, setIsLoading] = useState(true);
   const [dailyMessage, setDailyMessage] = useState("");
   const [isMounted, setIsMounted] = useState(false);
@@ -37,7 +37,6 @@ export default function HomePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
 
-  // SOLUCIÓN HYDRATION ERROR: Inicia en "ALL" y se actualiza después de montar
   const [selectedAccount, setSelectedAccount] = useState("ALL");
 
   useEffect(() => {
@@ -61,9 +60,6 @@ export default function HomePage() {
     if (isMounted) localStorage.setItem("bunker_account", selectedAccount);
   }, [selectedAccount, isMounted]);
 
-  // =====================================================================
-  // --- SECCIÓN 2: CARGA DE DATOS 
-  // =====================================================================
   const fetchDashboardData = async () => {
     setIsLoading(true);
     
@@ -81,7 +77,6 @@ export default function HomePage() {
         .select('*')
         .eq('user_id', user.id);
 
-      // NUEVO: Extraemos los mentores para saber el account_type
       const { data: mentorsData } = await supabase
         .from('mentors')
         .select('*')
@@ -149,7 +144,6 @@ export default function HomePage() {
     let peak = 0, maxDrawdown = 0; 
     const equityData: any[] = [];
 
-    // IDENTIFICADOR DE BINARIAS
     const isBinarias = selectedAccount !== "ALL" && mentors.some(m => m.broker === selectedAccount && m.account_type === 'binarias');
 
     const globalTrades = allTrades.filter(t => selectedAccount === "ALL" || t.account === selectedAccount);
@@ -184,14 +178,11 @@ export default function HomePage() {
     const winRate = filteredTrades.length > 0 ? Math.round((wins / filteredTrades.length) * 100) : 0;
     const profitFactor = grossLoss === 0 ? Number(grossProfit.toFixed(2)) : Number((grossProfit / grossLoss).toFixed(2));
 
-    // CÁLCULOS MATEMÁTICOS ADAPTATIVOS
     let nPF = Math.min(profitFactor * 50, 100); 
     const rawRatioWL = avgLoss > 0 ? (avgWin / avgLoss) : (avgWin > 0 ? 2 : 0);
     let nRatio = Math.min(rawRatioWL * 50, 100); 
 
     if (isBinarias) {
-      // Si es binarias, apagamos el castigo de Forex y damos el poder al Win Rate
-      // Un win rate >= 55% es rentable, así que inflamos positivamente el Radar
       nPF = winRate >= 55 ? Math.min(winRate + 20, 100) : Math.max(0, winRate - 10);
       nRatio = winRate >= 55 ? Math.min(winRate + 20, 100) : Math.max(0, winRate - 10);
     }
@@ -219,7 +210,7 @@ export default function HomePage() {
       bonus: financialData.bonus,
       indiceBunker
     };
-  }, [allTrades, filteredTrades, financialData, selectedAccount, mentors]); // Dependencia 'mentors' añadida
+  }, [allTrades, filteredTrades, financialData, selectedAccount, mentors]);
 
   const winRateChartData = [
     { name: 'Wins', value: metrics.wins, color: '#10b981' },
@@ -233,8 +224,8 @@ export default function HomePage() {
 
   if (!isMounted) return null;
 
-  return (
-    <div className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 pl-[250px] relative transition-colors duration-300">
+return (
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 lg:pl-[250px] relative transition-colors duration-300">
       
       <BunkerSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} selectedAccount={selectedAccount} />
       
@@ -248,7 +239,7 @@ export default function HomePage() {
         onAddTradeClick={() => window.dispatchEvent(new Event('open-add-trade'))} 
       />
 
-      <main className="pt-24 px-6 max-w-[1400px] mx-auto space-y-6">
+      <main className="pt-20 md:pt-24 px-4 md:px-6 max-w-[1400px] mx-auto space-y-6">
         
         <DashboardHeader 
           greeting={greeting} 
@@ -287,4 +278,5 @@ export default function HomePage() {
       </main>
     </div>
   );
+
 }

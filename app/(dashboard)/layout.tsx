@@ -40,7 +40,6 @@ export default async function DashboardLayout({
     }
   }
 
-  // PANTALLA NEGRA (Ahora usa un DIV que cubre todo en lugar de un HTML nuevo)
   if (isSuspended) {
     return (
       <div className="fixed inset-0 z-[9999] bg-[#090714] text-slate-300 flex items-center justify-center selection:bg-rose-500/30">
@@ -72,9 +71,9 @@ export default async function DashboardLayout({
     );
   }
 
-  // RENDERIZADO NORMAL 
-  return (
-    <div className="flex w-full min-h-screen overflow-hidden bg-[#07050f]">
+  // RENDERIZADO NORMAL (Restaurado a tu lógica original, solo con el bloqueo de desborde móvil)
+ return (
+    <div className="flex w-full max-w-[100vw] overflow-x-hidden relative">
       <Sidebar />
       <Toaster 
         position="top-right"
@@ -86,12 +85,10 @@ export default async function DashboardLayout({
         }} 
       />
       <GlobalModals />
-      
-      {/* EL CONTENEDOR PRINCIPAL: Ahora respeta el Sidebar en PC y no desborda en móvil */}
-      <main className="flex-1 flex flex-col w-full h-screen overflow-y-auto overflow-x-hidden md:ml-[250px]">
+      <div className="flex-1 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
         <TrialBanner />
         {children}
-      </main>
+      </div>
     </div>
   );
 }

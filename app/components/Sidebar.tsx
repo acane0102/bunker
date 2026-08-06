@@ -61,18 +61,18 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* OVERLAY OSCURO PARA MÓVIL (Cierra el menú al hacer clic fuera) */}
+      {/* OVERLAY OSCURO PARA MÓVIL Y TABLET */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* ASIDE CON ANIMACIÓN DE DESLIZAMIENTO PARA MÓVILES Y FIJO EN PC */}
-      <aside className={`fixed md:flex w-[250px] bg-[#0b0914] text-slate-300 flex-col h-screen top-0 left-0 border-r border-slate-800/50 z-50 font-sans transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      {/* ASIDE CON ANIMACIÓN: Oculto en móvil/tablet, Fijo en PC */}
+      <aside className={`fixed lg:flex w-[250px] bg-[#0b0914] text-slate-300 flex-col h-screen top-0 left-0 border-r border-slate-800/50 z-[100] font-sans transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         
-        {/* Logo ACANE BUNKER y Botón de cierre en móvil */}
+        {/* Logo ACANE BUNKER y Botón de cierre */}
         <div className="p-6 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center font-black text-white text-lg shadow-md shadow-indigo-500/20">
@@ -85,7 +85,7 @@ export default function Sidebar() {
           
           <button 
             onClick={() => setIsMobileMenuOpen(false)}
-            className="md:hidden text-slate-400 hover:text-white transition-colors"
+            className="lg:hidden text-slate-400 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -95,7 +95,7 @@ export default function Sidebar() {
         <div className="px-4 py-2 flex flex-col gap-2">
           <button 
             onClick={() => {
-              setIsMobileMenuOpen(false); // Cierra el menú en móvil al hacer clic
+              setIsMobileMenuOpen(false);
               window.dispatchEvent(new Event('open-add-trade'));
             }}
             className="w-full cursor-pointer bg-[#6366f1] hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center gap-2"
@@ -104,10 +104,9 @@ export default function Sidebar() {
             Añadir Operación
           </button>
 
-          {/* BOTÓN CONECTADO AL ESTADO LOCAL */}
           <button 
             onClick={() => {
-              setIsMobileMenuOpen(false); // Cierra el menú en móvil al hacer clic
+              setIsMobileMenuOpen(false);
               setIsImportModalOpen(true);
             }}
             className="w-full cursor-pointer bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 text-slate-400 hover:text-indigo-400 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-xs"
@@ -126,7 +125,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)} // Cerrar menú al navegar en móvil
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive
                     ? "bg-indigo-900/40 border-l-4 border-indigo-500 text-white"
@@ -165,13 +164,12 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* AQUÍ MONTAMOS TU MODAL PREMIUM */}
       <ImportTradesModal 
         isOpen={isImportModalOpen} 
         onClose={() => setIsImportModalOpen(false)} 
         onSuccess={() => {
           setIsImportModalOpen(false);
-          router.refresh(); // Refresca la página para mostrar los nuevos trades
+          router.refresh();
         }} 
       />
     </>

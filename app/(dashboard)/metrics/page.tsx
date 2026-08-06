@@ -263,10 +263,10 @@ export default function MetricsPage() {
   const ruinTrades100 = riskMatrix.find(r => r.levelNum === 100)?.consecutive || 0;
 
   return (
-    <div className="bg-slate-50 dark:bg-[#090714] text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 pl-[250px] relative transition-colors duration-300">
+    <div className="bg-slate-50 dark:bg-[#090714] text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 lg:pl-[250px] relative transition-colors duration-300">
       <Topbar title="Trends & Analytics" icon="monitoring" displayUnit={displayUnit} setDisplayUnit={setDisplayUnit} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
-      <main className="pt-24 px-6 max-w-[1200px] mx-auto space-y-6">
+      <main className="pt-20 md:pt-24 px-4 md:px-6 max-w-[1200px] mx-auto space-y-6">
         
         {/* NUEVA FILA 1: HEATMAP DE RIESGO DE RUINA */}
         <div className="bg-white dark:bg-[#131022] border border-rose-500/20 rounded-2xl shadow-sm overflow-hidden transition-colors duration-300 relative">
@@ -281,7 +281,7 @@ export default function MetricsPage() {
             </div>
           </div>
           
-          <div className="p-6 pb-2 flex justify-between items-end border-b border-slate-100 dark:border-slate-800/50">
+          <div className="p-4 md:p-6 pb-2 flex justify-between items-end border-b border-slate-100 dark:border-slate-800/50">
             <div>
               <h2 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">warning</span> Monte Carlo Simulation
@@ -294,8 +294,8 @@ export default function MetricsPage() {
             </div>
           </div>
 
-          <div className="p-6 overflow-x-auto">
-            <table className="w-full text-center border-collapse text-xs">
+          <div className="p-4 md:p-6 overflow-x-auto">
+            <table className="w-full text-center border-collapse text-xs min-w-[600px]">
               <thead>
                 <tr>
                   <th className="py-3 px-4 font-bold text-slate-400 text-left w-[20%]">Tamaño Pérdida</th>
@@ -339,7 +339,7 @@ export default function MetricsPage() {
             </table>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-900/30 px-6 py-4 border-t border-slate-100 dark:border-slate-800/50">
+          <div className="bg-slate-50 dark:bg-slate-900/30 px-4 md:px-6 py-4 border-t border-slate-100 dark:border-slate-800/50">
             <p className="text-xs font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
               El simulador detecta un Drawdown actual del <strong className="text-rose-500">{actualDrawdown.toFixed(2)}%</strong> en tu historial. 
               Manteniendo tu Win Rate del <strong className="text-indigo-500">{wrString}%</strong>, 
@@ -351,7 +351,7 @@ export default function MetricsPage() {
 
         {/* FILA 2: DONA Y DÍAS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 flex flex-col h-[280px] transition-colors duration-300">
+          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 md:p-6 flex flex-col h-[280px] transition-colors duration-300">
             <div>
               <h2 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Distribución</h2>
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">Dominancia por Activo</h3>
@@ -375,7 +375,7 @@ export default function MetricsPage() {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 flex flex-col h-[280px] transition-colors duration-300">
+          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 md:p-6 flex flex-col h-[280px] transition-colors duration-300">
             <div>
               <h2 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Comportamiento</h2>
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">Rendimiento por Día</h3>
@@ -398,7 +398,7 @@ export default function MetricsPage() {
 
         {/* FILA 3: DIRECCIONALIDAD Y SESIONES */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 flex flex-col h-[220px] transition-colors duration-300">
+          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 md:p-6 flex flex-col h-[220px] transition-colors duration-300">
             <div>
               <h2 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Sesgos Operativos</h2>
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">Longs vs Shorts</h3>
@@ -418,7 +418,7 @@ export default function MetricsPage() {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 flex flex-col h-[220px] transition-colors duration-300">
+          <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 md:p-6 flex flex-col h-[220px] transition-colors duration-300">
             <div>
               <h2 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Timing</h2>
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">Rendimiento por Horario</h3>
@@ -441,30 +441,30 @@ export default function MetricsPage() {
 
         {/* FILA 4: TABLA DE RANKING GAMIFICADA */}
         <div className="bg-white dark:bg-[#131022] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-colors duration-300">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+          <div className="px-4 md:px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
             <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Ranking de Setups</h3>
             <span className="material-symbols-outlined text-slate-400 dark:text-slate-600">emoji_events</span>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[500px]">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800">
-                  <th className="py-4 px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Setup</th>
-                  <th className="py-4 px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Win Rate</th>
-                  <th className="py-4 px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Total Trades</th>
-                  <th className="py-4 px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">P&L Neto</th>
+                  <th className="py-4 px-4 md:px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Setup</th>
+                  <th className="py-4 px-4 md:px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Win Rate</th>
+                  <th className="py-4 px-4 md:px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Total Trades</th>
+                  <th className="py-4 px-4 md:px-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">P&L Neto</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
                 {rankingData.map((setup, index) => (
                   <tr key={setup.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-6">
-                      <div className="flex items-center gap-3">
+                    <td className="py-3 px-4 md:px-6">
+                      <div className="flex items-center gap-2 md:gap-3">
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black ${index === 0 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'}`}>{index + 1}</div>
                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{setup.name}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-6 text-center">
+                    <td className="py-3 px-4 md:px-6 text-center">
                       <span className={`text-[10px] font-black px-2 py-1 rounded-md border ${
                         setup.winRate >= 60 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' :
                         setup.winRate >= 40 ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' :
@@ -473,8 +473,8 @@ export default function MetricsPage() {
                         {setup.winRate}%
                       </span>
                     </td>
-                    <td className="py-3 px-6 text-center text-xs font-bold text-slate-500 dark:text-slate-400 tabular-nums">{setup.totalTrades}</td>
-                    <td className={`py-3 px-6 text-right text-xs font-black tabular-nums ${setup.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{setup.pnl > 0 ? '+' : ''}${setup.pnl.toFixed(2)}</td>
+                    <td className="py-3 px-4 md:px-6 text-center text-xs font-bold text-slate-500 dark:text-slate-400 tabular-nums">{setup.totalTrades}</td>
+                    <td className={`py-3 px-4 md:px-6 text-right text-xs font-black tabular-nums ${setup.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{setup.pnl > 0 ? '+' : ''}${setup.pnl.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

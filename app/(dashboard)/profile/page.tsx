@@ -104,7 +104,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 pl-[250px] relative transition-colors duration-300">
+      <div className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 lg:pl-[250px] relative transition-colors duration-300">
         <Topbar 
           title="Profile & Settings" 
           icon="person" 
@@ -114,12 +114,12 @@ export default function ProfilePage() {
           setSelectedAccount={setSelectedAccount} 
         />
 
-        <main className="pt-24 px-6 max-w-[1400px] mx-auto space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="space-y-6">
+        <main className="pt-20 md:pt-24 px-4 md:px-6 max-w-[1400px] mx-auto space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="space-y-4 md:space-y-6">
               
               {/* TARJETA DE IDENTIDAD */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 relative transition-colors duration-300">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 md:p-6 relative transition-colors duration-300">
                 <div className="flex justify-between items-center mb-5">
                   <h2 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Datos del Operador</h2>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-widest border ${
@@ -132,17 +132,17 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-xl shadow-md shrink-0">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-xl shadow-md shrink-0">
                     {initial}
                   </div>
                   <div className="overflow-hidden w-full flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg truncate">{activeName}</h3>
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate">{email}</div>
+                    <div className="overflow-hidden pr-2">
+                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base md:text-lg truncate">{activeName}</h3>
+                      <div className="text-[10px] md:text-xs font-semibold text-slate-500 dark:text-slate-400 truncate">{email}</div>
                     </div>
                     {/* BOTÓN CON INTERCEPTOR INYECTADO */}
-                    <button onClick={handleEditClick} className="text-slate-400 hover:text-indigo-500 transition-colors bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <span className="material-symbols-outlined text-[18px] block">{isEditing ? 'close' : 'edit'}</span>
+                    <button onClick={handleEditClick} className="shrink-0 text-slate-400 hover:text-indigo-500 transition-colors bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="material-symbols-outlined text-[16px] md:text-[18px] block">{isEditing ? 'close' : 'edit'}</span>
                     </button>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function ProfilePage() {
               <BunkerManifesto />
             </div>
 
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <CapitalManager />
               <MentorManager />
             </div>
@@ -196,8 +196,8 @@ export default function ProfilePage() {
 
       {/* MODAL DE SEGURIDAD (CONGELAMIENTO) */}
       {showSuspendedModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0b0914] border border-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full mx-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+          <div className="bg-[#0b0914] border border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl max-w-sm w-full mx-auto flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-500/10 flex items-center justify-center rounded-full mb-5">
               <span className="material-symbols-outlined text-3xl text-rose-500">lock</span>
             </div>
