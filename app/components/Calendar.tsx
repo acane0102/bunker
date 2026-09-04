@@ -127,6 +127,19 @@ export default function Calendar({ filteredTrades, selectedMonth, onTradeUpdated
     }
   };
 
+  // Función para duplicar el trade
+  const handleDuplicateTrade = async (tradeToDuplicate: any) => {
+    const { id, ...newTradeData } = tradeToDuplicate; // Extraemos todo menos el ID original
+    
+    const { error } = await supabase.from('trades').insert([newTradeData]);
+    
+    if (!error) {
+      onTradeUpdated(); // Refresca los datos instantáneamente
+    } else {
+      alert("Error al duplicar: " + error.message);
+    }
+  };
+
   return (
    <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 lg:p-8 shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-full overflow-hidden flex flex-col font-sans relative transition-colors duration-300">
       
@@ -196,9 +209,9 @@ export default function Calendar({ filteredTrades, selectedMonth, onTradeUpdated
                   </div>
                 )}
 
-                {/* INICIO TOOLTIP DETALLADO */}
+                {/* INICIO TOOLTIP DETALLADO (Ahora Dinámico para no cortarse) */}
                 {data.isCurrentMonth && data.trades.length > 0 && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden lg:group-hover:block z-50 w-56 animate-in fade-in slide-in-from-bottom-2 pointer-events-none">
+                  <div className={`absolute left-1/2 -translate-x-1/2 hidden lg:group-hover:block z-50 w-56 animate-in fade-in pointer-events-none ${idx < 7 ? 'top-full mt-3 slide-in-from-top-2' : 'bottom-full mb-3 slide-in-from-bottom-2'}`}>
                     <div className="bg-slate-900 dark:bg-slate-950 border border-slate-700 rounded-2xl shadow-2xl p-4 text-left relative">
                       
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
@@ -223,7 +236,7 @@ export default function Calendar({ filteredTrades, selectedMonth, onTradeUpdated
                         </div>
                       </div>
 
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 dark:bg-slate-950 border-b border-r border-slate-700 transform rotate-45"></div>
+                      <div className={`absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 dark:bg-slate-950 border-slate-700 transform rotate-45 ${idx < 7 ? '-top-1.5 border-t border-l' : '-bottom-1.5 border-b border-r'}`}></div>
                     </div>
                   </div>
                 )}
@@ -301,6 +314,10 @@ export default function Calendar({ filteredTrades, selectedMonth, onTradeUpdated
                           <div className="flex justify-center gap-2 md:gap-3">
                             <button onClick={() => setEditingTrade(t)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors" title="Editar Neto">
                               <span className="material-symbols-outlined text-[16px] md:text-[18px]">edit</span>
+                            </button>
+                            {/* BOTÓN DUPLICAR AGREGADO */}
+                            <button onClick={() => handleDuplicateTrade(t)} className="text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors" title="Duplicar Trade">
+                              <span className="material-symbols-outlined text-[16px] md:text-[18px]">content_copy</span>
                             </button>
                             <button onClick={() => setTradeToDelete(t.id)} className="text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 transition-colors" title="Eliminar Trade">
                               <span className="material-symbols-outlined text-[16px] md:text-[18px]">delete</span>

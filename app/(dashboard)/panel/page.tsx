@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr"; // <-- Inyectamos el motor de caché
 import { supabase } from "@/lib/supabase";
 
 // Modales y Navegación
@@ -22,11 +23,36 @@ const BUNKER_MESSAGES = [
   "Respeta el plan. Consistencia sobre velocidad."
 ];
 
+// FUNCION DE OBTENCIÓN MASIVA (Concurrente)
+const fetcher = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("No autenticado");
+
+  // Promise.all lanza las 3 peticiones al mismo tiempo, cortando el tiempo a una tercera parte
+  const [tradesRes, transRes, mentorsRes] = await Promise.all([
+    supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
+    supabase.from('transactions').select('*').eq('user_id', user.id),
+    supabase.from('mentors').select('*').eq('user_id', user.id)
+  ]);
+
+  return {
+    trades: tradesRes.data || [],
+    transactions: transRes.data || [],
+    mentors: mentorsRes.data || []
+  };
+};
+
 export default function HomePage() {
-  const [allTrades, setAllTrades] = useState<any[]>([]);
-  const [allTransactions, setAllTransactions] = useState<any[]>([]);
-  const [mentors, setMentors] = useState<any[]>([]); 
-  const [isLoading, setIsLoading] = useState(true);
+  // SWR: Si los datos ya están en caché, los muestra instantáneamente mientras actualiza por detrás
+  const { data, isLoading, mutate } = useSWR('bunkerDashboardData', fetcher, {
+    revalidateOnFocus: false, // Evita recargar si el usuario cambia de ventana en su PC
+    dedupingInterval: 10000, // Bloquea peticiones repetidas en un lapso de 10 segundos
+  });
+
+  const allTrades = data?.trades || [];
+  const allTransactions = data?.transactions || [];
+  const mentors = data?.mentors || [];
+
   const [dailyMessage, setDailyMessage] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   
@@ -43,57 +69,28 @@ export default function HomePage() {
     setIsMounted(true);
     const savedAccount = localStorage.getItem("bunker_account");
     if (savedAccount) setSelectedAccount(savedAccount);
+    setDailyMessage(BUNKER_MESSAGES[Math.floor(Math.random() * BUNKER_MESSAGES.length)]);
 
     const handleOpenSettings = () => setIsSettingsOpen(true);
     const handleConfigUpdate = () => setForceUpdate(prev => prev + 1);
+    
+    // Escuchador global para actualizar caché manualmente al guardar un nuevo trade
+    const handleTradeAdded = () => mutate(); 
 
     window.addEventListener('open-bunker-settings', handleOpenSettings);
     window.addEventListener('bunker-config-updated', handleConfigUpdate);
+    window.addEventListener('bunker-trade-added', handleTradeAdded);
 
     return () => {
       window.removeEventListener('open-bunker-settings', handleOpenSettings);
       window.removeEventListener('bunker-config-updated', handleConfigUpdate);
+      window.removeEventListener('bunker-trade-added', handleTradeAdded);
     };
-  }, []);
+  }, [mutate]);
 
   useEffect(() => {
     if (isMounted) localStorage.setItem("bunker_account", selectedAccount);
   }, [selectedAccount, isMounted]);
-
-  const fetchDashboardData = async () => {
-    setIsLoading(true);
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-      const { data: trades } = await supabase
-        .from('trades')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
-        
-      const { data: trans } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id);
-
-      const { data: mentorsData } = await supabase
-        .from('mentors')
-        .select('*')
-        .eq('user_id', user.id);
-      
-      if (trades) setAllTrades(trades);
-      if (trans) setAllTransactions(trans);
-      if (mentorsData) setMentors(mentorsData);
-    }
-    
-    setIsLoading(false);
-  };
-
-  useEffect(() => { 
-    fetchDashboardData(); 
-    setDailyMessage(BUNKER_MESSAGES[Math.floor(Math.random() * BUNKER_MESSAGES.length)]);
-  }, []);
 
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? '¡Buenos días' : currentHour < 19 ? '¡Buenas tardes' : '¡Buenas noches';
@@ -224,7 +221,7 @@ export default function HomePage() {
 
   if (!isMounted) return null;
 
-return (
+  return (
     <div className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 min-h-screen font-sans pb-10 lg:pl-[250px] relative transition-colors duration-300">
       
       <BunkerSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} selectedAccount={selectedAccount} />
@@ -241,42 +238,48 @@ return (
 
       <main className="pt-20 md:pt-24 px-4 md:px-6 max-w-[1400px] mx-auto space-y-6">
         
-        <DashboardHeader 
-          greeting={greeting} 
-          dailyMessage={dailyMessage} 
-          timeRange={timeRange} 
-          setTimeRange={setTimeRange} 
-          setSelectedMonth={setSelectedMonth} 
-          equidadTotal={metrics.equidadTotal} 
-          saldoReal={metrics.saldoReal} 
-          bonus={metrics.bonus} 
-        />
-        
-        <MetricsCards 
-          metrics={metrics} 
-          winRateChartData={winRateChartData} 
-          pfChartData={pfChartData} 
-          pfColor={pfColor} 
-          tradesLength={filteredTrades.length} 
-        />
+        {isLoading && allTrades.length === 0 ? (
+          <div className="flex items-center justify-center h-40">
+             <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <>
+            <DashboardHeader 
+              greeting={greeting} 
+              dailyMessage={dailyMessage} 
+              timeRange={timeRange} 
+              setTimeRange={setTimeRange} 
+              setSelectedMonth={setSelectedMonth} 
+              equidadTotal={metrics.equidadTotal} 
+              saldoReal={metrics.saldoReal} 
+              bonus={metrics.bonus} 
+            />
+            
+            <MetricsCards 
+              metrics={metrics} 
+              winRateChartData={winRateChartData} 
+              pfChartData={pfChartData} 
+              pfColor={pfColor} 
+              tradesLength={filteredTrades.length} 
+            />
 
-        <MainCharts 
-          equityData={metrics.equityData} 
-          radarData={metrics.radar} 
-          indiceScore={metrics.indiceBunker} 
-          hasTrades={filteredTrades.length > 0} 
-        />
+            <MainCharts 
+              equityData={metrics.equityData} 
+              radarData={metrics.radar} 
+              indiceScore={metrics.indiceBunker} 
+              hasTrades={filteredTrades.length > 0} 
+            />
 
-        <div className="mt-6">
-          <Calendar 
-            filteredTrades={allTrades.filter(t => selectedAccount === "ALL" || t.account === selectedAccount)} 
-            selectedMonth={selectedMonth} 
-            onTradeUpdated={fetchDashboardData} 
-          />
-        </div>
-
+            <div className="mt-6">
+              <Calendar 
+                filteredTrades={allTrades.filter(t => selectedAccount === "ALL" || t.account === selectedAccount)} 
+                selectedMonth={selectedMonth} 
+                onTradeUpdated={() => mutate()} 
+              />
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
-
 }
